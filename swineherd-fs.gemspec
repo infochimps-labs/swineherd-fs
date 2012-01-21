@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{swineherd-fs}
-  s.version = "0.0.2"
+  s.version = "0.0.3"
   s.authors = ["David Snyder","Jacob Perkins"]
   s.date = %q{2012-01-20}
   s.description = %q{A filesystem abstraction for Amazon S3 and Hadoop HDFS}
