@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.date = %q{2012-01-20}
   s.description = %q{A Unix-like filesystem abstraction for Amazon S3 and Hadoop HDFS.}
   s.email = %q{"david@infochimps.com"}
-  s.homepage = %q{http://github.com/infochimps/swineherd-fs}
+  s.homepage = %q{http://github.com/infochimps-labs/swineherd-fs}
   s.require_paths = ["lib"]
 
   s.add_development_dependency("rspec")
