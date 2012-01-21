@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'configliere' ; Configliere.use(:commandline, :env_var, :define,:config_file)
 require 'logger'
 
@@ -7,8 +6,8 @@ require 'tempfile'
 require 'right_aws'
 
 require 'swineherd-fs/localfilesystem'
-require 'swineherd-fs/hadoopfilesystem'
 require 'swineherd-fs/s3filesystem'
+require 'swineherd-fs/hadoopfilesystem'
 
 #Merge in system and user settings
 SYSTEM_CONFIG_PATH = "/etc/swineherd.yaml" unless defined?(SYSTEM_CONFIG_PATH)
@@ -22,6 +21,19 @@ module Swineherd
     config.read SYSTEM_CONFIG_PATH if File.exists? SYSTEM_CONFIG_PATH
     config.read USER_CONFIG_PATH  if File.exists? USER_CONFIG_PATH
     @config ||= config
+  end
+
+  def self.logger
+    return @log if @log
+    @log ||= Logger.new(config[:log_file] || STDOUT)
+    @log.formatter = proc { |severity, datetime, progname, msg|
+      "[#{severity.upcase}] #{msg}\n"
+    }
+    @log
+  end
+
+  def self.logger= logger
+    @log = logger
   end
 
   module FileSystem
@@ -47,14 +59,14 @@ module Swineherd
 
     def self.exists?(path)
       fs = self.get(scheme_for(path))
-      Logger.new(STDOUT).info "Using #{fs.class}"
+      Swineherd.logger.info "Using #{fs.class}"
       fs.exists?(path)
     end
 
     def self.cp(srcpath,destpath)
       src_fs  = scheme_for(srcpath)
       dest_fs = scheme_for(destpath)
-      Logger.new(STDOUT).info "#{src_fs} --> #{dest_fs}"
+      Swineherd.logger.info "#{src_fs} --> #{dest_fs}"
       if(src_fs.eql?(dest_fs))
         self.get(src_fs).cp(srcpath,destpath)
       elsif src_fs.eql?(:file)
