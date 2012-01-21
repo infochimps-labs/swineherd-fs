@@ -1,0 +1,66 @@
+h1. Swineherd-fs
+
+    * @file@ - Local file system. Only thoroughly tested on Ubuntu Linux.
+    * @hdfs@ - Hadoop distributed file system. Uses the Apache Hadoop 0.20 API. Requires JRuby.
+    * @s3@   - Amazon Simple Storage System (s3).
+    * @ftp@  - FTP (Not yet implemented)
+
+    All filesystem abstractions implement the following core functions, many taken from the UNIX filesystem:
+
+    * @mv@
+    * @cp@
+    * @cp_r@
+    * @rm@
+    * @rm_r@
+    * @open@
+    * @exists?@
+    * @directory?@
+    * @ls@
+    * @ls_r@
+    * @mkdir_p@
+
+    Note: Since S3 is just a key-value store, it is difficult to preserve the notion of a directory.  Therefore the @mkdir_p@ function has no purpose, as there cannot be empty directories. @mkdir_p@ currently only ensures that the bucket exists.  This implies that the @directory?@ test only succeeds if the directory is non-empty, which clashes with the notion on the UNIX filesystem.
+
+    Additionally, the S3 and HDFS abstractions implement functions for moving files to and from the local filesystem:
+
+    * @copy_to_local@  
+    * @copy_from_local@
+
+    Note: For these methods the destination and source path respectively are assumed to be local, so they do not have to be prefaced by a filescheme.
+    
+    The @Swineherd::Filesystem@ module implements a generic filesystem abstraction using schemed filepaths (hdfs://,s3://,file://).
+
+    Currently only the following methods are supported for @Swineherd::Filesystem@:
+
+    * @cp@
+    * @exists?@
+    
+    For example, instead of doing the following:<pre><code>hdfs = Swineherd::HadoopFilesystem.new
+    localfs = Swineherd::LocalFileSystem.new
+    hdfs.copy_to_local('foo/bar/baz.txt', 'foo/bar/baz.txt') unless localfs.exists? 'foo/bar/baz.txt'
+    </code></pre>            
+    
+    You can do:<pre><code>fs = Swineherd::Filesystem
+    fs.cp('hdfs://foo/bar/baz.txt','foo/bar/baz.txt') unless fs.exists?('foo/bar/baz.txt')
+    </code></pre>        
+
+    Note: A path without a scheme is treated as a path on the local filesystem, or use the explicit file:// scheme for clarity.  The following are equivalent:
+
+    <pre><code>fs.exists?('foo/bar/baz.txt')
+    fs.exists?('file://foo/bar/baz.txt')
+    </code></pre>
+
+h4. Config
+
+ * In order to use the @S3Filesystem@, Swineherd requires AWS S3 access credentials.
+
+ * In @~/swineherd.yaml@ or @/etc/swineherd.yaml@:
+
+ <pre><code>aws:
+   access_key: my_access_key
+   secret_key: my_secret_key
+ </code></pre>
+
+ * Or just pass them in when creating the instance: 
+
+ <pre><code>S3 = Swineherd::S3FileSystem.new(:access_key => "my_access_key",:secret_key => "my_secret_key")</code></pre>
