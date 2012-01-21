@@ -11,6 +11,7 @@ module Swineherd
 
     def initialize *args
       set_hadoop_environment if running_jruby?
+
       @conf = Java::org.apache.hadoop.conf.Configuration.new
 
       if Swineherd.config[:aws]
@@ -222,19 +223,26 @@ module Swineherd
     #
     # Place hadoop jars in class path, require appropriate jars, set hadoop conf
     #
-    def set_hadoop_environment
-      @hadoop_conf = (ENV['HADOOP_CONF_DIR'] || File.join(@hadoop_home, 'conf'))
-      @hadoop_conf += "/" unless @hadoop_conf.end_with? "/"
-      $CLASSPATH << @hadoop_conf
 
+    def set_classpath
+      hadoop_conf = (ENV['HADOOP_CONF_DIR'] || File.join(@hadoop_home, 'conf'))
+      hadoop_conf += "/" unless hadoop_conf.end_with? "/"
+      $CLASSPATH << hadoop_conf unless $CLASSPATH.include?(hadoop_conf)
+    end
+
+    def import_classes
       Dir["#{@hadoop_home}/hadoop*.jar", "#{@hadoop_home}/lib/*.jar"].each{|jar| require jar}
-
       ['org.apache.hadoop.fs.Path',
         'org.apache.hadoop.fs.FileUtil',
         'org.apache.hadoop.mapreduce.lib.input.FileInputFormat',
         'org.apache.hadoop.mapreduce.lib.output.FileOutputFormat',
         'org.apache.hadoop.fs.FSDataOutputStream',
         'org.apache.hadoop.fs.FSDataInputStream'].map{|j_class| java_import(j_class) }
+    end
+
+    def set_hadoop_environment
+      set_classpath
+      import_classes
     end
 
   end
