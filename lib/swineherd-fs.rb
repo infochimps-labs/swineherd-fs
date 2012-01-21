@@ -59,14 +59,14 @@ module Swineherd
 
     def self.exists?(path)
       fs = self.get(scheme_for(path))
-      Swineherd.logger.info "Using #{fs.class}"
+      Swineherd.logger.info "#exists? - #{fs.class} for '#{path}'"
       fs.exists?(path)
     end
 
     def self.cp(srcpath,destpath)
       src_fs  = scheme_for(srcpath)
       dest_fs = scheme_for(destpath)
-      Swineherd.logger.info "#{src_fs} --> #{dest_fs}"
+      Swineherd.logger.info "#cp - #{src_fs} --> #{dest_fs}"
       if(src_fs.eql?(dest_fs))
         self.get(src_fs).cp(srcpath,destpath)
       elsif src_fs.eql?(:file)
