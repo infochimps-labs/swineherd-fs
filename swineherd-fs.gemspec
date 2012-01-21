@@ -18,6 +18,4 @@ Gem::Specification.new do |s|
   s.add_development_dependency("watchr")
   s.add_runtime_dependency(%q<configliere>, [">= 0"])
   s.add_runtime_dependency(%q<right_aws>, [">= 0"])
-  s.add_runtime_dependency(%q<jruby-openssl>, [">= 0"])
 end
-
