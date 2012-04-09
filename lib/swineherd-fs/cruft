@@ -1,0 +1,271 @@
+
+#
+# Returns an integer representing the device on which *stat* resides.
+#
+# @example `stat.dev -> fixnum`
+#    File.stat("testfile").dev   #=> 774
+#
+def dev
+  NoMethodError.abstract(self)
+end
+
+#
+# Returns the major part of `File_Stat#dev` or `nil`.
+#
+# @example `stat.dev_major -> fixnum`
+#    File.stat("/dev/fd1").dev_major   #=> 2
+#    File.stat("/dev/tty").dev_major   #=> 5
+#
+def stat.dev_major
+  NoMethodError.abstract(self)
+end
+
+#
+# Returns the minor part of `File_Stat#dev` or `nil`.
+#
+# @example `stat.dev_minor -> fixnum`
+#    File.stat("/dev/fd1").dev_minor   #=> 1
+#    File.stat("/dev/tty").dev_minor   #=> 0
+#
+def stat.dev_minor
+  NoMethodError.abstract(self)
+end
+
+#
+# Returns the inode number for *stat*.
+#
+# @example `stat.ino -> fixnum`
+#    File.stat("testfile").ino   #=> 1083669
+#
+def stat.ino
+  NoMethodError.abstract(self)
+end
+
+#
+# Returns the number of hard links to *stat*.
+#
+# @example `stat.nlink -> fixnum`
+#    File.stat("testfile").nlink             #=> 1
+#    File.link("testfile", "testfile.bak")   #=> 0
+#    File.stat("testfile").nlink             #=> 2
+#
+def stat.nlink
+  NoMethodError.abstract(self)
+end
+
+#
+# Returns an integer representing the device type on which *stat*
+# resides. Returns `nil` if the operating system doesn't support this feature.
+#
+# @example `stat.rdev -> fixnum or nil`
+#    File.stat("/dev/fd1").rdev   #=> 513
+#    File.stat("/dev/tty").rdev   #=> 1280
+#
+def stat.rdev
+  NoMethodError.abstract(self)
+end
+
+#
+# Returns the major part of `File_Stat#rdev` or `nil`.
+#
+# @example `stat.rdev_major -> fixnum`
+#    File.stat("/dev/fd1").rdev_major   #=> 2
+#    File.stat("/dev/tty").rdev_major   #=> 5
+#
+def stat.rdev_major
+  NoMethodError.abstract(self)
+end
+
+#
+# Returns the minor part of `File_Stat#rdev` or `nil`.
+#
+# @example `stat.rdev_minor -> fixnum`
+#    File.stat("/dev/fd1").rdev_minor   #=> 1
+#    File.stat("/dev/tty").rdev_minor   #=> 0
+#
+def stat.rdev_minor
+  NoMethodError.abstract(self)
+end
+
+#
+# Same as `File::stat`, but does not follow the last symbolic
+# link. Instead, reports on the link itself.
+#
+# @example `File.lstat(filename) -> stat`
+#    File.symlink("testfile", "link2test")   #=> 0
+#    File.stat("testfile").size              #=> 66
+#    File.lstat("link2test").size            #=> 8
+#    File.stat("link2test").size             #=> 66
+#
+def File.lstat(filename)
+  NoMethodError.abstract(self)
+end
+
+#
+# Same as `IO#stat`, but does not follow the last symbolic link. Instead,
+# reports on the link itself.
+#
+# @example `file.lstat -> stat`
+#    File.symlink("testfile", "link2test")   #=> 0
+#    File.stat("testfile").size              #=> 66
+#    f = File.new("link2test")
+#    f.lstat.size                            #=> 8
+#    f.stat.size                             #=> 66
+#
+def file.lstat
+  NoMethodError.abstract(self)
+end
+
+#
+# Returns `true` if the operating system supports pipes and *stat* is a pipe;
+# `false` otherwise.
+#
+# @example `stat.pipe? -> true or false`
+#   File.stat("testfile").pipe?   #=> false
+#
+def stat.pipe?
+  NoMethodError.abstract(self)
+end
+
+#
+# Returns `true` if *stat* is a socket, `false` if it isn't or if the operating
+# system doesn't support this feature.
+#
+# @example `stat.socket? -> true or false`
+#    File.stat("testfile").socket?   #=> false
+#
+def stat.socket?
+  NoMethodError.abstract(self)
+end
+
+#
+# Returns `true` if the file is a block device, `false` if it isn't or if the
+# operating system doesn't support this feature.
+#
+# @example `stat.blockdev? -> true or false`
+#    File.stat("testfile").blockdev?    #=> false
+#    File.stat("/dev/hda1").blockdev?   #=> true
+#
+def stat.blockdev?
+  NoMethodError.abstract(self)
+end
+
+#
+# Returns `true` if the file is a character device, `false` if it isn't or if
+# the operating system doesn't support this feature.
+#
+# @example `stat.chardev? -> true or false`
+#    File.stat("/dev/tty").chardev?   #=> true
+#
+def stat.chardev?
+  NoMethodError.abstract(self)
+end
+
+#
+# Returns `true` if *stat* is readable by the real user id of this process.
+#
+# @example `stat.readable_real? -> true or false`
+#    File.stat("testfile").readable_real?   #=> true
+#
+def stat.readable_real?
+  NoMethodError.abstract(self)
+end
+
+#
+# Returns `true` if *stat* is writable by the real user id of this process.
+#
+# @example `stat.writable_real? -> true or false`
+#    File.stat("testfile").writable_real?   #=> true
+#
+def stat.writable_real?
+  NoMethodError.abstract(self)
+end
+
+#
+# Same as `executable?`, but tests using the real owner of the process.
+#
+# @example `stat.executable_real? -> true or false`
+#
+def stat.executable_real?
+  NoMethodError.abstract(self)
+end
+
+#
+# Returns `true` if *stat* has the set-user-id permission bit set, `false` if it
+# doesn't or if the operating system doesn't support this feature.
+#
+# @example `stat.setuid? -> true or false`
+#    File.stat("/bin/su").setuid?   #=> true
+#
+def stat.setuid?
+  NoMethodError.abstract(self)
+end
+
+#
+# Returns `true` if *stat* has the set-group-id permission bit set, `false` if
+# it doesn't or if the operating system doesn't support this feature.
+#
+# @example `stat.setgid? -> true or false`
+#    File.stat("/usr/sbin/lpc").setgid?   #=> true
+#
+def stat.setgid?
+  NoMethodError.abstract(self)
+end
+
+#
+# Returns `true` if *stat* has its sticky bit set, `false` if it doesn't or if
+# the operating system doesn't support this feature.
+#
+# @example `stat.sticky? -> true or false`
+#    File.stat("testfile").sticky?   #=> false
+#
+def stat.sticky?
+  NoMethodError.abstract(self)
+end
+
+#
+# call-seq:
+#   file.flock(locking_constant )-> 0 or false
+#
+# Locks or unlocks a file according to *locking_constant* (a
+# logical "or" of the values in the table below).
+# Returns `false` if `File::LOCK_NB` is
+# specified and the operation would otherwise have blocked. Not
+# available on all platforms.
+#
+# Locking constants (in class File):
+#
+#    LOCK_EX   | Exclusive lock. Only one process may hold an
+#              | exclusive lock for a given file at a time.
+#    ----------+------------------------------------------------
+#    LOCK_NB   | Don't block when locking. May be combined
+#              | with other lock options using logical or.
+#    ----------+------------------------------------------------
+#    LOCK_SH   | Shared lock. Multiple processes may each hold a
+#              | shared lock for a given file at the same time.
+#    ----------+------------------------------------------------
+#    LOCK_UN   | Unlock.
+#
+# Example:
+#
+#    # update a counter using write lock
+#    # don't use "w" because it truncates the file before lock.
+#    File.open("counter", File::RDWR|File::CREAT, 0644) {|f|
+#      f.flock(File::LOCK_EX)
+#      value = f.read.to_i + 1
+#      f.rewind
+#      f.write("#{value}\n")
+#      f.flush
+#      f.truncate(f.pos)
+#    }
+#
+#    # read the counter using read lock
+#    File.open("counter", "r") {|f|
+#      f.flock(File::LOCK_SH)
+#      p f.read
+#    }
+#
+#
+def file.flock()
+  NoMethodError.abstract(self)
+end
