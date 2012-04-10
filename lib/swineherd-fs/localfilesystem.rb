@@ -6,12 +6,12 @@ module Swineherd
     end
 
     def open path, mode="r", &blk
-      File.open(path,mode,&blk)
+      File.open(path, mode, &blk)
     end
 
     #Globs for files at @path@, append '**/*' to glob recursively
     def size path
-      Dir[path].inject(0){|s,f|s+=File.size(f)}
+      Dir[path].inject(0){|s, f|s+=File.size(f)}
     end
 
     #A leaky abstraction, should be called rm_rf if it calls rm_rf
@@ -32,23 +32,23 @@ module Swineherd
     end
 
     def mv srcpath, dstpath
-      FileUtils.mv(srcpath,dstpath)
+      FileUtils.mv(srcpath, dstpath)
     end
 
     def cp srcpath, dstpath
-      FileUtils.cp(srcpath,dstpath)
+      FileUtils.cp(srcpath, dstpath)
     end
 
     def cp_r srcpath, dstpath
-      FileUtils.cp_r(srcpath,dstpath)
+      FileUtils.cp_r(srcpath, dstpath)
     end
 
     def mkdir_p path
       FileUtils.mkdir_p path
     end
 
-    #List directory contents,similar to unix `ls`
-    #Dir[@path@/*] to return files in immediate directory of @path@
+    # List directory contents, similar to unix `ls`
+    # Dir[@path@/*] to return files in immediate directory of @path@
     def ls path
       if exists?(path)
         if !directory?(path)
@@ -63,7 +63,7 @@ module Swineherd
     end
 
     #Recursively list directory contents
-    #Dir[@path@/**/*],similar to unix `ls -R`
+    #Dir[@path@/**/*], similar to unix `ls -R`
     def ls_r path
       if exists?(path)
         if !directory?(path)

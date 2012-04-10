@@ -15,22 +15,21 @@ module Swineherd
       @conf = Java::org.apache.hadoop.conf.Configuration.new
 
       if Swineherd.config[:aws]
-        @conf.set("fs.s3.awsAccessKeyId",Swineherd.config[:aws][:access_key])
-        @conf.set("fs.s3.awsSecretAccessKey",Swineherd.config[:aws][:secret_key])
-
-        @conf.set("fs.s3n.awsAccessKeyId",Swineherd.config[:aws][:access_key])
-        @conf.set("fs.s3n.awsSecretAccessKey",Swineherd.config[:aws][:secret_key])
+        @conf.set("fs.s3.awsAccessKeyId",      Swineherd.config[:aws][:access_key])
+        @conf.set("fs.s3.awsSecretAccessKey",  Swineherd.config[:aws][:secret_key])
+        @conf.set("fs.s3n.awsAccessKeyId",     Swineherd.config[:aws][:access_key])
+        @conf.set("fs.s3n.awsSecretAccessKey", Swineherd.config[:aws][:secret_key])
       end
 
       @hdfs = Java::org.apache.hadoop.fs.FileSystem.get(@conf)
     end
 
     def open path, mode="r", &blk
-      HadoopFile.new(path,mode,self,&blk)
+      HadoopFile.new(path, mode, self, &blk)
     end
 
     def size path
-      ls_r(path).inject(0){|sz,filepath| sz += @hdfs.get_file_status(Path.new(filepath)).get_len}
+      ls_r(path).inject(0){|sz, filepath| sz += @hdfs.get_file_status(Path.new(filepath)).get_len}
     end
 
     def ls path
@@ -39,14 +38,14 @@ module Swineherd
 
     #list directories recursively, similar to unix 'ls -R'
     def ls_r path
-      ls(path).inject([]){|rec_paths,path| rec_paths << path; rec_paths << ls(path) unless file?(path); rec_paths}.flatten
+      ls(path).inject([]){|rec_paths, path| rec_paths << path; rec_paths << ls(path) unless file?(path); rec_paths}.flatten
     end
 
     def rm path
       begin
         @hdfs.delete(Path.new(path), false)
-      rescue java.io.IOException => e
-        raise Errno::EISDIR, e.message
+      rescue java.io.IOException => err
+        raise Errno::EISDIR, err.message, err.backtrace
       end
     end
 
@@ -70,15 +69,15 @@ module Swineherd
       @hdfs.rename(Path.new(srcpath), Path.new(dstpath))
     end
 
-    #supports s3://,s3n://,hdfs:// in @srcpath@ and @dstpath@
+    #supports s3://, s3n://, hdfs:// in @srcpath@ and @dstpath@
     def cp srcpath, dstpath
-      @src_fs  = Java::org.apache.hadoop.fs.FileSystem.get(Java::JavaNet::URI.create(srcpath),@conf)
-      @dest_fs = Java::org.apache.hadoop.fs.FileSystem.get(Java::JavaNet::URI.create(dstpath),@conf)
-      FileUtil.copy(@src_fs, Path.new(srcpath),@dest_fs, Path.new(dstpath), false, @conf)
+      @src_fs  = Java::org.apache.hadoop.fs.FileSystem.get(Java::JavaNet::URI.create(srcpath), @conf)
+      @dest_fs = Java::org.apache.hadoop.fs.FileSystem.get(Java::JavaNet::URI.create(dstpath), @conf)
+      FileUtil.copy(@src_fs, Path.new(srcpath), @dest_fs, Path.new(dstpath), false, @conf)
     end
 
-    def cp_r srcpath,dstpath
-      cp srcpath,dstpath
+    def cp_r srcpath, dstpath
+      cp srcpath, dstpath
     end
 
     def mkdir_p path
@@ -148,20 +147,20 @@ module Swineherd
       options[:partition_fields] ||= 2
       options[:sort_fields]      ||= 2
       options[:field_separator]  ||= '/t'
-      names = inputs.map{|inp| File.basename(inp)}.join(',')
+      names = inputs.map{|inp| File.basename(inp)}.join(', ')
       cmd   = "#{@hadoop_home}/bin/hadoop \\
        jar         #{@hadoop_home}/contrib/streaming/hadoop-*streaming*.jar                   \\
        -D          mapred.job.name=\"Swineherd Merge (#{names} -> #{output})\"               \\
        -D          num.key.fields.for.partition=\"#{options[:partition_fields]}\"            \\
        -D          stream.num.map.output.key.fields=\"#{options[:sort_fields]}\"             \\
-       -D          mapred.text.key.partitioner.options=\"-k1,#{options[:partition_fields]}\" \\
+       -D          mapred.text.key.partitioner.options=\"-k1, #{options[:partition_fields]}\" \\
        -D          stream.map.output.field.separator=\"'#{options[:field_separator]}'\"      \\
        -D          mapred.min.split.size=1000000000                                          \\
        -D          mapred.reduce.tasks=#{options[:reduce_tasks]}                             \\
        -partitioner org.apache.hadoop.mapred.lib.KeyFieldBasedPartitioner                    \\
        -mapper     \"/bin/cat\"                                                              \\
        -reducer    \"/usr/bin/uniq\"                                                         \\
-       -input      \"#{inputs.join(',')}\"                                                   \\
+       -input      \"#{inputs.join(', ')}\"                                                   \\
        -output     \"#{output}\""
       puts cmd
       system cmd
@@ -174,7 +173,7 @@ module Swineherd
       # In order to open input and output streams we must pass around the hadoop fs object itself
       #
       def initialize path, mode, fs, &blk
-        raise Errno::EISDIR,"#{path} is a directory" if fs.directory?(path)
+        raise Errno::EISDIR, "#{path} is a directory" if fs.directory?(path)
         @path = Path.new(path)
         case mode
         when "r"
@@ -212,8 +211,8 @@ module Swineherd
     def running_jruby?
       begin
         require 'java'
-      rescue LoadError => e
-        raise "\nJava not found, are you sure you're running with JRuby?\n" + e.message
+      rescue LoadError => err
+        raise LoadError, "\nJava not found, are you sure you're running with JRuby?\n#{err.message}", err.backtrace
       end
       @hadoop_home = ENV['HADOOP_HOME']
       raise "\nHadoop installation not found, try setting $HADOOP_HOME\n" unless @hadoop_home && (File.exist? @hadoop_home)
@@ -232,7 +231,7 @@ module Swineherd
 
     def import_classes
       Dir["#{@hadoop_home}/hadoop*.jar", "#{@hadoop_home}/lib/*.jar"].each{|jar| require jar}
-      ['org.apache.hadoop.fs.Path',
+      [ 'org.apache.hadoop.fs.Path',
         'org.apache.hadoop.fs.FileUtil',
         'org.apache.hadoop.mapreduce.lib.input.FileInputFormat',
         'org.apache.hadoop.mapreduce.lib.output.FileOutputFormat',
