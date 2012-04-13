@@ -1,7 +1,8 @@
-
 This library provides the regular ruby filesystem interface (`File`, `Pathname`, etc) on top of distributed file systems and blob stores. It has support for Hadoop's HDFS, Amazon's S3, an S3 HDFS, and regular (local) files, giving them as-closely-as-reasonable the experience you already know.
 
 ## Components
+
+The Filesystem class must implement:
 
   - #copy -- within fs
   - #move -- within fs
@@ -34,28 +35,16 @@ This library provides the regular ruby filesystem interface (`File`, `Pathname`,
   - #uid
   - #gid
 
-  __________________________________________________________________________
-
-  - #concat / #copy_merge
-  - #append
-  __________________________________________________________________________
-
-  - #mkpath
-  - #rmtree
-  - #opendir(*args)
-  - #glob(*args)
-  - #entries
-  - #binread(*args)
-  - #readlines(*args)
-  - #each_line
-  
-  - exists?
+It may optionally implement
 
   - #lchmod(mode)
   - #lchown(owner, group)
   - #make_link(old)
   - #make_symlink(old)
   - #truncate(length)
+  - #concat
+  - #copy_merge
+  - #append
 
 * Wukong::WuPathname --
 
@@ -122,6 +111,16 @@ This library provides the regular ruby filesystem interface (`File`, `Pathname`,
   - #mkdir
   - #mkdir_p
   - #mkpath
+
+  - #mkpath
+  - #rmtree
+  - #opendir(*args)
+  - #glob(*args)
+  - #entries
+  - #binread(*args)
+  - #readlines(*args)
+  - #each_line
+  - exists?
 
   - #remove
   - #safe_unlink
