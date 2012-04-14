@@ -10,18 +10,7 @@
 #
 # <tt>pathname.rb</tt> is distributed with Ruby since 1.8.0.
 #
-
-require 'pathname.so'
-
 class Pathname
-
-  # :stopdoc:
-  if RUBY_VERSION < "1.9"
-    TO_PATH = :to_str
-  else
-    # to_path is implemented so Pathname objects are usable with File.open, etc.
-    TO_PATH = :to_path
-  end
 
   SAME_PATHS = if File::FNM_SYSCASE.nonzero?
     proc {|a, b| a.casecmp(b).zero?}
