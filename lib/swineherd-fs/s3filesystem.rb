@@ -12,6 +12,11 @@ module Swineherd
       aws_secret_key = options[:aws_secret_key] || (Swineherd.config[:aws] && Swineherd.config[:aws][:secret_key])
       raise "Missing AWS keys" unless aws_access_key && aws_secret_key
       @s3 = RightAws::S3.new(aws_access_key, aws_secret_key,:logger => Logger.new(nil)) #FIXME: Just wanted it to shut up
+      super options
+    end
+
+    def glob path
+      super path, "s3n"
     end
 
     def open path, mode="r", &blk

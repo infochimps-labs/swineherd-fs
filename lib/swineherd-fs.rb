@@ -5,6 +5,7 @@ require 'fileutils'
 require 'tempfile'
 require 'right_aws'
 
+require 'swineherd-fs/filesystem'
 require 'swineherd-fs/localfilesystem'
 require 'swineherd-fs/s3filesystem'
 require 'swineherd-fs/hadoopfilesystem'
@@ -36,7 +37,7 @@ module Swineherd
     @log = logger
   end
 
-  module FileSystem
+  module FileSystemX
 
     HDFS_SCHEME_REGEXP = /^hdfs:\/\//
     S3_SCHEME_REGEXP   = /^s3n?:\/\//
