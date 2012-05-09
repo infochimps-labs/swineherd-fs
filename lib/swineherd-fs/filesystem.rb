@@ -3,40 +3,17 @@ require 'open-uri'
 
 module Swineherd
   class FileSystem
-
-    class HadoopPath
-      def initialize child, prefix
-        @child = child
-        @prefix = prefix
-      end
-
-      def glob path
-        @child.glob File.join(@prefix, path)
-      end
-
-      def to_s
-        return @prefix
-      end
-      
-    end
-
-    instance_eval do
-      def wrap_fs_methods *symbols
-        symbols.each do |symbol|
-          old_method = "#{symbol}_handler".to_sym
-          define_method symbol do |*paths|
-            params = @find_fs.call paths
-            self.send old_method, *params
-          end
-        end
-      end
-    end
-
     #
     # If no path is provided, a filesystem will be generated using the
     # default hadoop configuration.
     #
-    def initialize type = :hdfs
+    def initialize fs = :hdfs
+
+      type = case fs
+             when String then /([^:]*):\/\//.match(fs)[1].to_sym
+             when Symbol then fs
+             end
+
       @hadoop_home = ENV['HADOOP_HOME']
 
       hadoop_conf = (ENV['HADOOP_CONF_DIR'] || File.join(@hadoop_home, 'conf'))
@@ -93,17 +70,20 @@ module Swineherd
         @find_fs = s3_fs_finder
       end
     end
+    
+    def self.fs_method(symb)
+      define_method(symb) { |*paths| yield *@find_fs.call(paths) }
+    end
 
     def get_fs uri
       @filesystems[uri] ||= Java::org.apache.hadoop.fs.FileSystem.get(uri,
                                                                       @conf)
     end
 
-    wrap_fs_methods :glob
-
-    def glob_handler fs, glob
-      files = fs.glob_status Java::org.apache.hadoop.fs.Path.new(glob)
-      (files || []).map { |f| HadoopPath.new(self, f.get_path.to_s) }
+    fs_method :glob do |fs, glob|
+      fs.glob_status(Java::org.apache.hadoop.fs.Path.new(glob)).map do |f|
+        f.get_path.to_s
+      end
     end
   end
 end
