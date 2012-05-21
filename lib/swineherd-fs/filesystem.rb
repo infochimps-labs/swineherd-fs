@@ -8,9 +8,14 @@ module Swineherd
     attr_reader :type, :filesystems
     protected :type, :filesystems
 
-    def initialize
+    def initialize *args
+      raise NoMethodError.new "Use Swineherd::FileSystem.get to construct me."
+    end
+
+    def init_parent type
       Swineherd.configure_hadoop_jruby
       @conf = Swineherd.get_hadoop_conf
+      @type = type
     end
 
     #
@@ -25,18 +30,15 @@ module Swineherd
                 m ? m[1].to_sym : :hdfs
               when Symbol then fs
               else
-                require 'pp'; pp @type.class
                 raise ArgumentError.new("wrong type of fs: #{@type} has type "\
                                         "#{@type.class}")
               end
 
-      @type = :local if @type == :file
-
       case @type
-      when :local then LocalFileSystem.new
-      when :hdfs then HadoopFileSyste.new
-      when :s3n then S3FileSystem.new
-      when :s3 then S3FileSystem.new
+      when :local then LocalFileSystem.new @type
+      when :hdfs then HadoopFileSystem.new @type
+      when :s3n then S3FileSystem.new @type 
+      when :s3 then S3FileSystem.new @type
       end
     end
 
@@ -46,7 +48,7 @@ module Swineherd
     # and S3 native filesystems are currently the only examples.
     #
     def get_fs uri
-      return @filesystem
+      @filesystem
     end
 
     class HadoopFile
@@ -81,7 +83,7 @@ module Swineherd
     end
 
     def open path, mode="r", &blk
-      fs = get_fs
+      fs = get_fs path
       HadoopFile.new(path, mode, fs, &blk)
     end
 

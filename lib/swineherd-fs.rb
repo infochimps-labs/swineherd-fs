@@ -17,12 +17,16 @@ module Swineherd
     defined?(USER_CONFIG_PATH)
 
   def self.configure_hadoop_jruby
-    $HADOOP_HOME = ENV['HADOOP_HOME']
-    $CLASSPATH << File.join(File.join(ENV['HADOOP_HOME'], 'conf') ||
+    hadoop_home = ENV['HADOOP_HOME']
+
+    raise "\nHadoop installation not found. Try setting $HADOOP_HOME\n" unless
+      (hadoop_home and (File.exist? hadoop_home))
+
+    $CLASSPATH << File.join(File.join(hadoop_home, 'conf') ||
                             ENV['HADOOP_CONF_DIR'],
                             '') # add trailing slash
                             
-    Dir["#{@hadoop_home}/{hadoop*.jar,lib/*.jar}"].each{|jar| require jar}
+    Dir["#{hadoop_home}/{hadoop*.jar,lib/*.jar}"].each{|jar| require jar}
 
     begin
       require 'java'
@@ -30,8 +34,6 @@ module Swineherd
       raise "\nJava not found. Are you sure you're running with JRuby?\n" +
         e.message
     end
-    raise "\nHadoop installation not found. Try setting $HADOOP_HOME\n" unless
-      (@hadoop_home and (File.exist? @hadoop_home))
   end
 
   def self.get_hadoop_conf

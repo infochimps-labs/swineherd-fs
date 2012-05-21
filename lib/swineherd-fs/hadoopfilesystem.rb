@@ -1,8 +1,8 @@
 module Swineherd
   class HadoopFileSystem < FileSystem
-    def initialize
+    def initialize *args
       @filesystem = Java::org.apache.hadoop.fs.FileSystem.get(@conf)
-      super
+      init_parnet *args
     end
   end
 end
