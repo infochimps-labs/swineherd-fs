@@ -9,33 +9,8 @@ module Swineherd
     protected :type, :filesystems
 
     def initialize
-      @hadoop_home = ENV['HADOOP_HOME']
-
-      hadoop_conf = (ENV['HADOOP_CONF_DIR'] || File.join(@hadoop_home, 'conf'))
-      hadoop_conf += "/" unless hadoop_conf.end_with? "/"
-      $CLASSPATH << hadoop_conf unless $CLASSPATH.include?(hadoop_conf)
-      
-      Dir["#{@hadoop_home}/{hadoop*.jar,lib/*.jar}"].each{|jar| require jar}
-      
-      begin
-        require 'java'
-      rescue LoadError => e
-        raise "\nJava not found. Are you sure you're running with JRuby?\n" +
-          e.message
-      end
-      raise "\nHadoop installation not found. Try setting $HADOOP_HOME\n" unless
-        (@hadoop_home and (File.exist? @hadoop_home))
-      true
-
-      @conf = Java::org.apache.hadoop.conf.Configuration.new
-
-      if Swineherd.config[:aws]
-        @conf.set("fs.s3.awsAccessKeyId",Swineherd.config[:aws][:access_key])
-        @conf.set("fs.s3.awsSecretAccessKey",Swineherd.config[:aws][:secret_key])
-
-        @conf.set("fs.s3n.awsAccessKeyId",Swineherd.config[:aws][:access_key])
-        @conf.set("fs.s3n.awsSecretAccessKey",Swineherd.config[:aws][:secret_key])
-      end
+      Swineherd.configure_hadoop_jruby
+      @conf = Swineherd.get_hadoop_conf
     end
 
     #
@@ -51,7 +26,8 @@ module Swineherd
               when Symbol then fs
               else
                 require 'pp'; pp @type.class
-                raise ArgumentError.new "wrong type of fs"
+                raise ArgumentError.new("wrong type of fs: #{@type} has type "\
+                                        "#{@type.class}")
               end
 
       @type = :local if @type == :file
@@ -116,48 +92,7 @@ module Swineherd
       # For some reason, toArray is sometimes returning null in the
       # Hadoop FileSystem.globStatus method, causing jruby to return
       # nil. That shouldn't happen, but this will handle it.
-      (fs.glob_status(path) || []).map do |f|
-        f.get_path.to_s
-      end
-    end
-  end
-
-  class LocalFileSystem
-    def initialize
-      fs_uri = Java::java.net.URI.new("file:///")
-      @filesystem = Java::org.apache.hadoop.fs.FileSystem.get(fs_uri, @conf)
-      super
-    end
-  end
-
-  class HadoopFileSystem
-    def initialize
-      @filesystem = Java::org.apache.hadoop.fs.FileSystem.get(@conf)
-      super
-    end
-  end
-
-  class S3FileSystem
-    def initialize
-      @filesystems = {}
-      super
-    end
-    
-    def get_fs path
-      %r{
-            (?:(?<protocol>s3n?):\/\/)?
-            (?<bucket>[^\/]*)
-            (?<fs_path>\/.*$)
-        }x =~ path
-
-      # ignore user-specified protocol, if any
-      protocol = type.to_s
-
-      fs_uri = Java::java.net.URI.new("#{protocol}://#{bucket}")
-      [get_fs(fs_uri), fs_path]
-      
-      @filesystems[uri] ||= Java::org.apache.hadoop.fs.FileSystem.get(uri,
-                                                                      @conf)
+      (fs.glob_status(path) || []).map{|f| f.get_path.to_s }
     end
   end
 end
