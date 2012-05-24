@@ -1,8 +1,8 @@
 module Swineherd
   class S3FileSystem < FileSystem
     def initialize *args
-      @filesystems = {}
       init_parent *args
+      @filesystems = {}
     end
 
     # FIXME: Considering a bucket part of a path is creating all kinds
